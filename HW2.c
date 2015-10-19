@@ -28,11 +28,12 @@ typedef struct node {
 } node;
 
 typedef struct listParameters {
+	node * listOfRands;
 	int numOfRands;
 	int upperLim;
 } listParameters;
 
-node * LOR; //= malloc(sizeof(node));
+//node * LOR; //= malloc(sizeof(node));
 
 void printList(node * head) {
 	node * current = head;
@@ -119,13 +120,13 @@ void editList(node * head) {
 void * firstThreadWrapper(void * arg) {
 	printf("Start First Thread\n");
 
-	LOR = malloc(sizeof(node)); ///////////////////////////////
+	//LOR = malloc(sizeof(node)); ///////////////////////////////
 
 	listParameters * parameters = (listParameters *)arg;
 	
-	createList(LOR, parameters->numOfRands, parameters->upperLim);
-	printf("Size of List: %d\n", size(LOR));
-	printList(LOR);
+	createList(parameters->listOfRands, parameters->numOfRands, parameters->upperLim);
+	printf("Size of List: %d\n", size(parameters->listOfRands));
+	printList(parameters->listOfRands);
 
 	return NULL;
 }
@@ -133,22 +134,22 @@ void * firstThreadWrapper(void * arg) {
 void * secondThreadWrapper(void * arg) {
 	printf("Start Second Thread \n");
 
-	LOR = malloc(sizeof(node)); ///////////////////////////////
+	//LOR = malloc(sizeof(node)); ///////////////////////////////
 
 	listParameters * parameters = (listParameters *)arg;
 
-	editList(LOR);
-	printf("Size of List: %d\n", size(LOR));
-	printList(LOR);
+	editList(parameters->listOfRands);
+	printf("Size of List: %d\n", size(parameters->listOfRands));
+	printList(parameters->listOfRands);
 
-	while (size(LOR) != parameters->numOfRands) {
-		fillList(LOR, parameters->numOfRands, parameters->upperLim, size(LOR));
-		printf("Size of List: %d\n", size(LOR));
-		printList(LOR);
+	while (size(parameters->listOfRands) != parameters->numOfRands) {
+		fillList(parameters->listOfRands, parameters->numOfRands, parameters->upperLim, size(parameters->listOfRands));
+		printf("Size of List: %d\n", size(parameters->listOfRands));
+		printList(parameters->listOfRands);
 
-		editList(LOR);
-		printf("Size of List: %d\n", size(LOR));
-		printList(LOR);
+		editList(parameters->listOfRands);
+		printf("Size of List: %d\n", size(parameters->listOfRands));
+		printList(parameters->listOfRands);
 	}
 	return NULL;
 }
@@ -158,6 +159,9 @@ int main(int argc, char *argv[]) {
 	srand(time(NULL));
 
 	listParameters * parameters = malloc(sizeof(listParameters));
+
+	parameters->listOfRands = malloc(sizeof(node));
+
 	parameters->numOfRands = atoi(argv[1]);
 	parameters->upperLim = atoi(argv[2]);
 
