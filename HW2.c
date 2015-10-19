@@ -27,6 +27,13 @@ typedef struct node {
 	struct node * next;
 } node;
 
+typedef struct listParameters {
+	int numOfRands;
+	int upperLim;
+} listParameters;
+
+node * LOR; //= malloc(sizeof(node));
+
 void printList(node * head) {
 	node * current = head;
 	current = current->next; // this was my easy fix...printing out 0 always every time...not included in the list itself
@@ -68,8 +75,10 @@ void fillList(node * listOfRands, int numOfRands, int upperLim, int currLen) {
 }
 
 void createList(node * listOfRands, int numOfRands, int upperLim) {
-	//node * listOfRands = head;
 	int i;
+
+	//LOR = malloc(sizeof(node)); ///////////////////////////////
+
 	for (i = 0; i < numOfRands; i++) {
 		add(listOfRands, (rand() % upperLim));
 	}
@@ -107,12 +116,50 @@ void editList(node * head) {
 	printf("Edited List of Illegal Parameters \n");
 }
 
+void * firstThreadWrapper(void * arg) {
+	printf("Start First Thread\n");
+
+	LOR = malloc(sizeof(node)); ///////////////////////////////
+
+	listParameters * parameters = (listParameters *)arg;
+	
+	createList(LOR, parameters->numOfRands, parameters->upperLim);
+	printf("Size of List: %d\n", size(LOR));
+	printList(LOR);
+
+	return NULL;
+}
+
+void * secondThreadWrapper(void * arg) {
+	printf("Start Second Thread \n");
+
+	LOR = malloc(sizeof(node)); ///////////////////////////////
+
+	listParameters * parameters = (listParameters *)arg;
+
+	editList(LOR);
+	printf("Size of List: %d\n", size(LOR));
+	printList(LOR);
+
+	while (size(LOR) != parameters->numOfRands) {
+		fillList(LOR, parameters->numOfRands, parameters->upperLim, size(LOR));
+		printf("Size of List: %d\n", size(LOR));
+		printList(LOR);
+
+		editList(LOR);
+		printf("Size of List: %d\n", size(LOR));
+		printList(LOR);
+	}
+	return NULL;
+}
+
 int main(int argc, char *argv[]) {
-	int numOfRands = atoi(argv[1]);
-	int upperLim = atoi(argv[2]);
+
 	srand(time(NULL));
 
-	node * listOfRands = malloc(sizeof(node));
+	listParameters * parameters = malloc(sizeof(listParameters));
+	parameters->numOfRands = atoi(argv[1]);
+	parameters->upperLim = atoi(argv[2]);
 
 	if (argc > 3) {
 		printf("ERROR: Too Many Arguments\n");
@@ -123,36 +170,26 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	else {
-		// pthread_t producerThread;
-		// pthread_t consumerThread;
+		pthread_t firstThread;
+		pthread_t secondThread;
 
-		// if (pthread_create(producerThread, NULL, , )) {
-		// 	printf("ERROR: Producer Thread Creation Err");
-		// 	return 1;
-		// }
-		// if (pthread_create(consumerThread, NULL, , )) {
-		// 	printf("ERROR: Consumer Thread Creation Err");
-		// 	return 1;
-		// }
-
-		createList(listOfRands,numOfRands,upperLim);
-		printf("Size of List: %d\n", size(listOfRands));
-		printList(listOfRands);
-		
-		editList(listOfRands);
-		printf("Size of List: %d\n", size(listOfRands));
-		printList(listOfRands);
-
-		// this is done solely after you've edited the list to see if there were any modifications
-		while (size(listOfRands) != numOfRands) {
-			fillList(listOfRands, numOfRands, upperLim, size(listOfRands));
-			printf("Size of List: %d\n", size(listOfRands));
-			printList(listOfRands);
-
-			editList(listOfRands);
-			printf("Size of List: %d\n", size(listOfRands));
-			printList(listOfRands);
+		if (pthread_create(&firstThread, NULL, &firstThreadWrapper, parameters)) {
+			printf("ERROR: Producer Thread Creation Err");
+			return 1;
 		}
+
+		pthread_join(firstThread, NULL);
+		printf("Finish First Thread\n");
+
+		if (pthread_create(&secondThread, NULL, &secondThreadWrapper, parameters)) {
+			printf("ERROR: Consumer Thread Creation Err");
+			return 1;
+		}
+
+		pthread_join(secondThread, NULL);
+		printf("Finish Second Thread\n");
+
+		printf("Finish Program\n");
 	}
 	return 0; // return 0 of main if successful
 }
