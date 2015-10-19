@@ -5,7 +5,7 @@
 	COMPILE		gcc programName.c
 	RUN 			./a.out numOfRands upperLim
 
-	argc is numer of arguments
+	argc is number of arguments
 	3 Arguments - File Name, numOfRands, upperLim
 	argv[0] is the File Name
 */
@@ -15,7 +15,6 @@
 #include <time.h>
 #include <pthread.h>
 
-// C doesn't have boolean types so you have to manually define it
 #define bool char
 #define FALSE 0
 #define TRUE 1
@@ -32,8 +31,6 @@ typedef struct listParameters {
 	int numOfRands;
 	int upperLim;
 } listParameters;
-
-//node * LOR; //= malloc(sizeof(node));
 
 void printList(node * head) {
 	node * current = head;
@@ -52,7 +49,7 @@ int size(node * head) {
 		count ++;
 	}
 	return count;
-}
+} // end size
 
 void add(node * head, int x) {
 	node * current = head;
@@ -73,18 +70,16 @@ void fillList(node * listOfRands, int numOfRands, int upperLim, int currLen) {
 		add(listOfRands, (rand() % upperLim));
 	}
 	printf("Filled Linked List\n");
-}
+} // end fillList
 
 void createList(node * listOfRands, int numOfRands, int upperLim) {
 	int i;
-
-	//LOR = malloc(sizeof(node)); ///////////////////////////////
 
 	for (i = 0; i < numOfRands; i++) {
 		add(listOfRands, (rand() % upperLim));
 	}
 	printf("Created Linked List\n");
-}
+} // end createList
 
 void editList(node * head) {
 
@@ -114,14 +109,12 @@ void editList(node * head) {
 			}
 		}
 	}
-	printf("Edited List of Illegal Parameters \n");
-}
+	printf("Checked List of Illegal Parameters \n");
+} // end editList
 
 void * firstThreadWrapper(void * arg) {
 	printf("Start First Thread\n");
-
-	//LOR = malloc(sizeof(node)); ///////////////////////////////
-
+ 
 	listParameters * parameters = (listParameters *)arg;
 	
 	createList(parameters->listOfRands, parameters->numOfRands, parameters->upperLim);
@@ -129,12 +122,10 @@ void * firstThreadWrapper(void * arg) {
 	printList(parameters->listOfRands);
 
 	return NULL;
-}
+} // end firstThreadWrapper
 
 void * secondThreadWrapper(void * arg) {
 	printf("Start Second Thread \n");
-
-	//LOR = malloc(sizeof(node)); ///////////////////////////////
 
 	listParameters * parameters = (listParameters *)arg;
 
@@ -152,7 +143,7 @@ void * secondThreadWrapper(void * arg) {
 		printList(parameters->listOfRands);
 	}
 	return NULL;
-}
+} // end secondThreadWrapper
 
 int main(int argc, char *argv[]) {
 
@@ -165,15 +156,26 @@ int main(int argc, char *argv[]) {
 	parameters->numOfRands = atoi(argv[1]);
 	parameters->upperLim = atoi(argv[2]);
 
+	// CANNOT CAN'T WHEN ARGUMENTS ARE LESS THAN 3...WHEN ONLY INPUT 0 OR 1 ARGS
+	// ALWAYS SEG FAULTS
+
 	if (argc > 3) {
-		printf("ERROR: Too Many Arguments\n");
+		printf("ERROR: Argument Count\n");
 		return 1; 
 	}
-	else if (argc < 3) { // seg faulting param, edit so it actually does something
-		printf("ERROR: Not Enough Arguments\n");
-		return 1;
+	else if (argc < 3) {
+		printf("Program doesn't go to this, just seg faults\n");
+		return 1; 
 	}
-	else {
+	else if (argc = 3 && atoi(argv[1]) <= 0 && atoi(argv[2]) >= 100) {
+		printf("ERROR: Number of Items <= 0\n");
+		return 1; 
+	}
+	else if (argc = 3 && atoi(argv[1]) > 0 && atoi(argv[2]) < 100) {
+		printf("ERROR: Random Number Limit < 100\n");
+		return 1; 
+	}
+	else if (argc = 3 && atoi(argv[1]) > 0 && atoi(argv[2]) >= 100){
 		pthread_t firstThread;
 		pthread_t secondThread;
 
@@ -195,5 +197,9 @@ int main(int argc, char *argv[]) {
 
 		printf("Finish Program\n");
 	}
+	else {
+		printf("ERROR: Something went wrong in something I didn't catch.\n");
+		return 1; 
+	}
 	return 0; // return 0 of main if successful
-}
+} // end main
