@@ -149,22 +149,8 @@ int main(int argc, char *argv[]) {
 
 	srand(time(NULL));
 
-	listParameters * parameters = malloc(sizeof(listParameters));
-
-	parameters->listOfRands = malloc(sizeof(node));
-
-	parameters->numOfRands = atoi(argv[1]);
-	parameters->upperLim = atoi(argv[2]);
-
-	// CANNOT CAN'T WHEN ARGUMENTS ARE LESS THAN 3...WHEN ONLY INPUT 0 OR 1 ARGS
-	// ALWAYS SEG FAULTS
-
-	if (argc > 3) {
+	if (argc != 3) {
 		printf("ERROR: Argument Count\n");
-		return 1; 
-	}
-	else if (argc < 3) {
-		printf("Program doesn't go to this, just seg faults\n");
 		return 1; 
 	}
 	else if (argc = 3 && atoi(argv[1]) <= 0 && atoi(argv[2]) >= 100) {
@@ -176,6 +162,13 @@ int main(int argc, char *argv[]) {
 		return 1; 
 	}
 	else if (argc = 3 && atoi(argv[1]) > 0 && atoi(argv[2]) >= 100){
+
+		listParameters * parameters = malloc(sizeof(listParameters));
+
+		parameters->listOfRands = malloc(sizeof(node));
+		parameters->numOfRands = atoi(argv[1]);
+		parameters->upperLim = atoi(argv[2]);
+
 		pthread_t firstThread;
 		pthread_t secondThread;
 
